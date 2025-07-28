@@ -1,0 +1,38 @@
+name: Create New Branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch_name:
+        description: 'Enter the name of the new branch'
+        required: true
+        type: string
+        default: 'feature/'
+
+jobs:
+  create_branch:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Git user
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Create and push branch
+        run: |
+          # Print the branch name for logging
+          echo "Creating branch: ${{ github.event.inputs.branch_name }}"
+          
+          # Create and push the new branch
+          git checkout -b "${{ github.event.inputs.branch_name }}"
+          git push origin "${{ github.event.inputs.branch_name }}"
+          
+          echo "✅ Branch '${{ github.event.inputs.branch_name }}' has been created successfully!"
