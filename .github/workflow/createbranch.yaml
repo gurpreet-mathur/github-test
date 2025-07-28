@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create New Branch (GitHub Actions Trigger)</title>
+</head>
+<body>
+  <h1>Create New Branch</h1>
+  <label for="branchName">Branch Name:</label>
+  <input type="text" id="branchName" />
+  <button id="createBranchBtn">Create Branch</button>
+  <pre id="output"></pre>
+
+  <script>
+    const owner = 'YOUR_OWNER'; // e.g. 'octocat'
+    const repo = 'YOUR_REPO';   // e.g. 'hello-world'
+    const workflow_id = 'create-branch.yml'; // or use the workflow numeric ID
+    const githubToken = 'YOUR_PERSONAL_ACCESS_TOKEN'; // Store securely in real apps
+
+    document.getElementById('createBranchBtn').onclick = async function() {
+      const branchName = document.getElementById('branchName').value;
+      if (!branchName) {
+        alert('Please enter a branch name.');
+        return;
+      }
+
+      const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow_id}/dispatches`;
+      const body = JSON.stringify({
+        ref: "main", // Change if your default branch is not 'main'
+        inputs: {
+          branch_name: branchName
+        }
+      });
+
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${githubToken}`,
+            "Accept": "application/vnd.github+json",
+            "Content-Type": "application/json"
+          },
+          body: body
+        });
+
+        if (res.status === 204) {
+          document.getElementById('output').textContent = `Branch '${branchName}' creation triggered successfully!`;
+        } else {
+          const out = await res.text();
+          document.getElementById('output').textContent = `Error: ${res.status}\n${out}`;
+        }
+      } catch (err) {
+        document.getElementById('output').textContent = `Request failed: ${err}`;
+      }
+    };
+  </script>
+</body>
+</html>
